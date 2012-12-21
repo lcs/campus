@@ -1,0 +1,61 @@
+<!DOCTYPE html><html lang="en">
+  <head>
+  <meta charset="utf-8">
+  <title>Campus Test Client</title>
+  <link rel="stylesheet" href="css/style.css?v=2">
+  <script src="js/modernizr.min.js"></script>
+</head>
+
+<body>
+<strong>Location:</strong><br>
+<input id="wsUri" size="35">
+<br>
+<input type="checkbox" id="secureCb" onclick="toggleTls();">
+<span id="secureCbLabel" style="font-size: smaller; color: black; ">Use secure WebSocket (TLS)</span><br>
+<button id="connect">Connect</button>
+<button id="disconnect" disabled="">Disconnect</button>
+<br/>
+<br/>
+<strong>Log:</strong>
+<div id="consoleLog"></div>
+<button id="clearLogBut" style="position: relative; top: 3px;">Clear log</button>
+<br>
+<br>
+<strong>Message:</strong><br>
+<input id="sendMessage" size="100" disabled=""></textarea>
+<br>
+<button id="send" class="wsButton" disabled="">Send</button>
+
+<script src="js/jquery.min.js"></script>
+<script src="js/echo.js"></script>
+<script>
+  var input_history = [];
+  var history_pointer = 0;
+  
+  $('#sendMessage').keyup(function(e) {
+  var code = (e.keyCode ? e.keyCode : e.which);
+  console.log(code);
+  if(code == 13) {
+    console.log("13");
+    doSend()
+    input_history.unshift($('#sendMessage').val())
+    $('#sendMessage').val("");
+    history_pointer = 0;
+  } else if(code == 38) {
+    if (history_pointer < input_history.length) {
+      $('#sendMessage').val(input_history[history_pointer]);
+      setCaretToPos($('#sendMessage'), $('#sendMessage').val().length)
+      history_pointer += 1;
+    }
+  } else if(code == 40) {
+    if (history_pointer > 0) {
+      history_pointer -= 1;
+      $('#sendMessage').val(input_history[history_pointer]);
+    } else {
+      $('#sendMessage').val("");      
+    }
+  }  
+  });
+</script>
+
+</body></html>
