@@ -60,9 +60,9 @@ EventMachine.run {
           ws.send "\n\nTHAT WAS A BAD ERROR!\n\n"
         end
       else
-        login = WorldObject.everything.select {|o| o.is_a?(Person) && CONNECTION_MAP[o].nil? && o.name == msg }
+        login = WorldObject.everything.select {|o| o.is_a?(Person) && o.name == msg }
         LOG.info login
-        response = if login.size > 0
+        response = if login.size > 1
           LOG.error %{ERROR: Name duplicate found for #{msg}.}
           "Errcode:HEEZAPONG! There are multiple Person objects with that name in the system. Error logged. Talk to an admin to resolve, or log in as someone else and fix the name duplication."
         elsif login.size == 0
@@ -72,10 +72,16 @@ EventMachine.run {
           ws.identified = true
           "#{msg} has been temporarily created and you are logged in as #{msg}.<br/>Be sure to read the help section on saving your changes to the world."
         else
-          ws.person = login.first
-          CONNECTION_MAP[ws.person] = ws
-          ws.identified = true
-          "You are logged in as #{msg}." 
+          user = login.first
+          if CONNECTION_MAP[user].nil?
+            ws.person = user
+            CONNECTION_MAP[user] = ws
+            ws.identified = true
+            "You are logged in as #{msg}." 
+          else
+            "That user is already logged in. Try again." 
+          end
+
         end
         ws.send response
       end

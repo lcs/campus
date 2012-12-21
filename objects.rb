@@ -237,7 +237,7 @@ class Person < WorldObject
       @location = new_location
       @location.people.each {|p| p.tx "#{@name} joins you.<br/>"}
       @location.people << self
-      "...and you step through to...<br/>" + @location.look
+      @location.look
     end
   end
 
