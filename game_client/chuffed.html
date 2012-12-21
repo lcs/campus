@@ -1,0 +1,102 @@
+<html>
+<head>
+  <title>GameClient</title>
+  <link href="stylesheets/application.css?1354227632" media="all" rel="stylesheet" type="text/css" />
+  <script src="javascripts/application.js?1354223522" type="text/javascript"></script>
+  <script src="javascripts/jquery-1.7.2.min.js?1353097277" type="text/javascript"></script>
+</head>
+<body style="background-color:#D8D8D8;">
+
+<script language="javascript" type="text/javascript">
+
+  var wsUri = "ws://baby-vm.dhcp.mathworks.com:33334/";
+  var output;
+  var websocket;
+
+  function connect_to_world()
+  {
+    websocket = new WebSocket(wsUri);
+    websocket.onopen = function(evt) { onOpen(evt) };
+    websocket.onclose = function(evt) { onClose(evt) };
+    websocket.onmessage = function(evt) { onMessage(evt) };
+    websocket.onerror = function(evt) { onError(evt) };    
+  }
+
+  function close_connection()
+  {
+    websocket.close();  
+  }
+
+  function clear_history()
+  {
+    $("#conlog").html("");  
+  }
+
+  function onOpen(evt)
+  {
+    writeToScreen("<font color='green'>You are connected...</font>");
+    // doSend("WebSocket rocks");
+  }
+
+  function onClose(evt)
+  {
+    writeToScreen("<font color='red'>DISCONNECTED</font>");
+  }
+
+  function onMessage(evt)
+  {
+    writeToScreen('<span style="color: #6666CC;">' + evt.data+'</span>');
+  }
+
+  function onError(evt)
+  {
+    writeToScreen('<span style="color: red;">ERROR:</span> ' + evt.data);
+  }
+
+  function doSend()
+  {
+    message = $("#sendMessage").val();
+    if (message.length == 0)
+    {
+      writeToScreen("What of it, then?!?"); 
+    }
+    else
+    {
+      writeToScreen("<br><font color='#0066CC'>you>&nbsp; </font><font color='green'>" + message + "</font><br>"); 
+      websocket.send(message);
+      $("#sendMessage").val("");
+    }
+  }
+
+  function writeToScreen(message)
+  {
+    if ($("#conlog").html().length > 0)  { message = "<br>" + message; }
+    $("#conlog").append(message);
+    $("#conlog").scrollTop($("#conlog")[0].scrollHeight);
+  }
+</script>
+
+<h3>Magic Digital Funtime Client - chuffed</h3>
+<div id="echo">
+  <div id="echo-config" style="float: left;">
+    <strong>World Server: ws://baby-vm.dhcp.mathworks.com:33334/</strong>
+    <button id="connect">Connect</button>
+    <button id="disconnect">Disconnect</button>
+    <br><br>
+    <div class="editable" id="conlog"></div><br/>
+    <input id="sendMessage" size="140" placeholder="What doeth thou wish?" onkeydown="if (event.keyCode == 13) { $('#send').trigger('click');; }">&nbsp;<button id="send" class="wsButton">Send</button>
+    <br><button id="clearLogBut" style="position: relative; top: 3px;">Clear History</button>
+  </div>
+</div>
+
+<script>
+$(document).ready(function() {
+  $("#connect").click(connect_to_world);
+  $("#disconnect").click(close_connection);
+  $("#clearLogBut").click(clear_history);
+  $("#send").click(doSend); 
+});
+</script>
+
+</body>
+</html>
