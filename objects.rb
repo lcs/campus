@@ -1,6 +1,10 @@
 require 'yaml'
 require 'active_support/core_ext/string'
 
+def divify(line, css_class="response normal")
+  %[<div class="line"><span class="#{css_class}">#{line}</span></div>]
+end
+
 class WorldObject
   attr_accessor :name, :description, :behaviors
   
@@ -137,7 +141,7 @@ EOF
     end
     WorldObject.everything.each{|o| o.reload_behaviors}
     LOG.info "#{by_who} saved the world."
-    CONNECTION_MAP.each {|k,v| k.tx "#{by_who} saved the world.<br/>"}
+    CONNECTION_MAP.each {|k,v| k.tx "#{by_who} saved the world.", "response alert"}
     "Save complete."
   end  
 end
@@ -169,7 +173,7 @@ class Place < WorldObject
     "#{@name}<br/>
     #{@description}<br/>
     Exits: #{@exits.keys}<br/>
-    Occupants: #{@people}<br/>"
+    Occupants: #{@people}"
   end
   
 end
@@ -201,8 +205,8 @@ class Person < WorldObject
     "Connected!"
   end
     
-  def tx(message="")
-    CONNECTION_MAP[self].send message unless CONNECTION_MAP[self].nil?
+  def tx(message="", css_class="response normal")
+    CONNECTION_MAP[self].send divify(message, css_class) unless CONNECTION_MAP[self].nil?
   end
 
   def look(args=nil)
@@ -211,7 +215,7 @@ class Person < WorldObject
       "#{@location.name}<br/>
       #{@location.description}<br/>
       Exits: #{@location.exits.keys}<br/>
-      Occupants: #{@location.people}<br/>"
+      Occupants: #{@location.people}"
     else
       examine(name)
     end
@@ -235,7 +239,7 @@ class Person < WorldObject
     else
       has_left @location
       @location = new_location
-      @location.people.each {|p| p.tx "#{@name} joins you.<br/>"}
+      @location.people.each {|p| p.tx "#{@name} joins you.", "response alert"}
       @location.people << self
       @location.look
     end
@@ -257,30 +261,30 @@ class Person < WorldObject
         LOG.error "Invalid goto target: #{item}"
         return "Not much happens since the thing you're targeting isn't a place and doesn't respond to :location. Weird? Tell an admin!"
       end
-      @location.people.each {|p| p.tx "BAMF! #{@name} arrives in a cloud of acrid smoke!<br/>" }
+      @location.people.each {|p| p.tx "BAMF! #{@name} arrives in a cloud of acrid smoke!", "response alert" }
       @location.people << self
-      "...BAMF!...<br/>" + @location.look
+      "...BAMF!..." + @location.look
     end
   end
   
   def examine(args)
     thing, block = *args 
     object = local_ref(thing)
-    return "There is no #{thing} at this location.<br/>" if object.size == 0
-    object.size == 1 ? display(object.first) : "Dammit, I can't figure out which one you mean!<br/>"
+    return "There is no #{thing} at this location." if object.size == 0
+    object.size == 1 ? display(object.first) : "Dammit, I can't figure out which one you mean!"
   end  
   
   def say(args)
     words, block = *args 
-    (@location.people - [self]).each{ |p| p.tx "#{self.name}: \"#{words}\"<br/>" }
-    "#{self.name}: \"#{words}\"<br/>"
+    (@location.people - [self]).each{ |p| p.tx "#{self.name}: \"#{words}\"" }
+    "#{self.name}: \"#{words}\""
   end
   alias :s :say
   
   def emote(args)
     action, block = *args 
-    (@location.people - [self]).each{ |p| p.tx "#{self.name} #{action}<br/>" }
-    "#{self.name} #{action}<br/>"
+    (@location.people - [self]).each{ |p| p.tx "#{self.name} #{action}" }
+    "#{self.name} #{action}"
   end
   alias :e :emote
   
@@ -294,12 +298,12 @@ class Person < WorldObject
   
   def has_left(location)
     location.people.delete self
-    location.people.each {|p| p.tx "#{@name} leaves...<br/>"}
+    location.people.each {|p| p.tx "#{@name} leaves...", "response alert"}
   end  
 
   def has_bamfed(location)
     location.people.delete self
-    location.people.each {|p| p.tx "BAMF! #{@name} disappears...<br/>"}
+    location.people.each {|p| p.tx "BAMF! #{@name} disappears...", "response alert"}
   end  
 
 end

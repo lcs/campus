@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="en">
+
+  <head>
+    <meta charset="utf-8">
+    <title>Campus Client</title>
+    <link rel="stylesheet" href="css/application.css">
+    <script src="js/modernizr.min.js"></script>
+  </head>
+  
+  <body>
+    <h3>Magic Digital Funtime (Campus) Client - Chüffed</h3>
+    
+    <!-- BEGIN UI Bulk Here -->
+    <div id="echo">
+      <div id="echo-config" style="float: left;">
+        <strong>Campus Server: </strong><input id="wsUri" size="35" value="ws://localhost:33334"/>
+        <button id="connect">Connect</button>
+        <button id="disconnect">Disconnect</button>
+        <br><br>
+        <div class="editable" id="conlog"></div>
+        <input id="sendMessage" size="140">
+        <br><button id="clearLogBut" style="position: relative; top: 3px;">Clear History</button>
+        <input id="mirrorOutput" type="checkbox" style="position: relative; top: 3px;"/>Mirror Input
+      </div>
+    </div>
+    <!-- END UI Bulk Here -->
+
+
+    <!-- BEGIN Scripting Here (Modernizr must load in the head though.) -->
+    <script src="js/jquery.min.js"></script>
+    <script src="js/messages.js"></script>
+    <script src="js/application.js"></script>
+    <script>
+    $(document).ready(function() {
+      $("#connect").click(connect_to_world);
+      $("#disconnect").click(close_connection);
+      $("#clearLogBut").click(clear_history);
+      $("#send").click(doSend); 
+      $('#sendMessage').keyup(singleLineInputHandler);
+      $('#sendMessage').focus();
+      connect_to_world();
+    });
+    </script>
+    <!-- END Scripting Here -->
+
+  </body>
+</html>
