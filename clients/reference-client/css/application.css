@@ -37,3 +37,15 @@ body { font:13px/1.231 sans-serif; *font-size:small; } /* hack retained to prese
     border-radius: 20px;
 }
 
+.terminal .terminal-output div span {
+  color: #9A9;
+}
+
+.terminal-output {
+  color: #090;
+}
+
+.cmd {
+  color: #AFA;
+}
+

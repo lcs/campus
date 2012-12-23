@@ -8,7 +8,7 @@ require "./objects.rb"
 require 'logger'
 require 'yaml'
 require 'cgi'
-
+require './motd.rb'
 # key is person object, value is connection
 CONNECTION_MAP = {}
 
@@ -35,7 +35,7 @@ starting_place = ObjectSpace.each_object(WorldObject).select {|o| o.name == "The
 starting_place = [Place.new] unless starting_place.any?
 NOWHERE = starting_place.first
 
-def divify(line, css_class="response normal")
+def colorize(line, css_class="response normal")
     %[#{line}]
 end
 
@@ -46,40 +46,40 @@ EventMachine.run {
     ws.onopen do
       LOG.info ws.inspect
       ws.identified = false
-      response = %[What is your name? (You will always use this to login.) <br/>Users:#{WorldObject.everything.select {|o| o.is_a?(Person)}.inspect}]
-      ws.send(divify(response))
+      response = %[#{MOTD}\n\nWhat is your name? (You will always use this to login.) \nUsers:#{WorldObject.everything.select {|o| o.is_a?(Person)}.inspect}]
+      ws.send(colorize(response))
     end
 
     ws.onmessage do |msg|
       if ws.identified
         response = begin
-          divify(ws.person.instance_eval msg)
+          colorize(ws.person.instance_eval msg)
         rescue Exception => e
           LOG.error msg + "\n" + e.inspect.to_s + "\n" + e.message + "\n" + e.backtrace.join("\n")
-          str = %[Errcode:GLARG! #{msg} - <a href="#" onclick="$('#id-#{e.object_id}').toggle();">#{e.message}</a><br/><span id="id-#{e.object_id}" style="display:none;"><br/>#{e.backtrace.join("<br/>")}</span>]
-          divify(str,"response error")
+          str = %[[[;#f55;#000]Errcode:GLARG! #{msg} - #{e.message}]\n#{e.backtrace.join("\n")}]
+          colorize(str,"response error")
         end
 
         begin
           ws.send response
         rescue Exception => e
           LOG.error e.message + e.backtrace.join("\n")
-          ws.send divify("THAT WAS A BAD ERROR! Check the server log for that one. I can't recover.", "response error")
+          ws.send colorize("THAT WAS A BAD ERROR! Check the server log for that one. I can't recover.", "response error")
         end
       else
         login = WorldObject.everything.select {|o| o.is_a?(Person) && o.name == msg }
         LOG.info login
         response = if login.size > 1
           LOG.error %{ERROR: Name duplicate found for #{msg}.}
-          str = "Errcode:HEEZAPONG! There are multiple Person objects with that name in the system. Error logged. Talk to an admin to resolve, or log in as someone else and fix the name duplication."
-          divify(str, "response alert")
+          str = "Errcode:HEEZAPONG! There are multiple Person objects with that name in the system.\nError logged.\nTalk to an admin to resolve, or log in as someone else and fix the name duplication."
+          colorize(str, "response alert")
         elsif login.size == 0
           ws.person = Person.new(NOWHERE)
           ws.person.name = msg
           CONNECTION_MAP[ws.person] = ws
           ws.identified = true
-          str = "#{msg} has been temporarily created and you are logged in as #{msg}.<br/>Be sure to read the help section on saving your changes to the world."
-          divify(str, "response alert")
+          str = "#{msg} has been temporarily created and you are logged in as #{msg}.\nBe sure to read the help section on saving your changes to the world."
+          colorize(str, "response alert")
         else
           user = login.first
           if CONNECTION_MAP[user].nil?
@@ -87,9 +87,9 @@ EventMachine.run {
             CONNECTION_MAP[user] = ws
             ws.identified = true
             str = "You are logged in as #{msg}." 
-            divify(str, "response alert")
+            colorize(str, "response alert")
           else
-            divify("That user is already logged in. Try again.", "response alert")
+            colorize("That user is already logged in. Try again.", "response alert")
           end
 
         end
@@ -98,7 +98,7 @@ EventMachine.run {
     end
 
     ws.onclose do
-      ws.person.location.people.each{ |p| CONNECTION_MAP[p].send divify("#{ws.person.name} has disconnected.", "response alert") unless CONNECTION_MAP[p].nil? }
+      ws.person.location.people.each{ |p| CONNECTION_MAP[p].send colorize("#{ws.person.name} has disconnected.", "response alert") unless CONNECTION_MAP[p].nil? }
       CONNECTION_MAP.delete ws.person
     end
 

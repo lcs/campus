@@ -1,15 +1,15 @@
 require 'yaml'
 require 'active_support/core_ext/string'
 
-def divify(line, css_class="response normal")
+def colorize(line, css_class="response normal")
   %[#{line}]
 end
 
 class WorldObject
   attr_accessor :name, :description, :behaviors
     
-  def name
-    %{[[b;#aaf;#000]#{@name}]}
+  def to_s
+    @name
   end
     
   def WorldObject.find_or_create_the_shiny_book_of_help
@@ -170,13 +170,9 @@ class Place < WorldObject
     self.instance_variables.sort.to_s
   end  
 
-  def look(args=[])
-    "#{@name}
-    #{@description}
-    Exits: #{@exits.keys}
-    Occupants: #{@people}"
+  def to_s
+    @name
   end
-  
 end
 
 class Person < WorldObject
@@ -207,13 +203,18 @@ class Person < WorldObject
   end
     
   def tx(message="", css_class="response normal")
-    CONNECTION_MAP[self].send divify(message, css_class) unless CONNECTION_MAP[self].nil?
+    CONNECTION_MAP[self].send colorize(message, css_class) unless CONNECTION_MAP[self].nil?
   end
 
   def look(args=nil)
     name, block = *args 
     if args.nil?
-      "#{@location.name}\n#{@location.description}\nExits: #{@location.exits.keys}\nOccupants: #{@location.people}"
+      <<EOF
+#{self.location.to_s}
+#{self.location.description}
+Exits: #{self.location.exits.keys}
+Occupants: #{self.location.people}"
+EOF
     else
       examine(name)
     end

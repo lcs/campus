@@ -19,15 +19,9 @@ function close_connection()
   websocket.close();  
 }
 
-function onOpen(evt)
-{
-  return the_term.echo('CONNECTED');
-}
+function onOpen(evt) {}
 
-function onClose(evt)
-{
-  return the_term.echo('DISCONNECTED');
-}
+function onClose(evt) {}
 
 function onMessage(evt)
 {
@@ -39,7 +33,7 @@ function onMessage(evt)
 
 function onError(evt)
 {
-  return the_term.echo('ERROR:' + Campus.error + ' ' + evt.data);
+  return the_term.echo('ERROR:' + Campus.error + ' ' + evt.data).css("color","red");
 }
 
 function doSend(message)
