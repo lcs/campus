@@ -2,16 +2,16 @@ require 'yaml'
 require 'active_support/core_ext/string'
 
 def divify(line, css_class="response normal")
-  %[<div class="line"><span class="#{css_class}">#{line}</span></div>]
+  %[#{line}]
 end
 
 class WorldObject
   attr_accessor :name, :description, :behaviors
-  
-  def to_s
-    @name
+    
+  def name
+    %{[[b;#aaf;#000]#{@name}]}
   end
-  
+    
   def WorldObject.find_or_create_the_shiny_book_of_help
     book = WorldObject.everything.select {|o| o.is_a?(Thing) && o.name == "The Shiny Book Of Help"}
     if book.size == 0
@@ -104,7 +104,8 @@ class WorldObject
   end
   
   def display(object)
-    "#{object.name}<br/>#{object.description}"
+    "#{object.name}
+    #{object.description}"
   end
   
   def everything
@@ -170,9 +171,9 @@ class Place < WorldObject
   end  
 
   def look(args=[])
-    "#{@name}<br/>
-    #{@description}<br/>
-    Exits: #{@exits.keys}<br/>
+    "#{@name}
+    #{@description}
+    Exits: #{@exits.keys}
     Occupants: #{@people}"
   end
   
@@ -212,10 +213,7 @@ class Person < WorldObject
   def look(args=nil)
     name, block = *args 
     if args.nil?
-      "#{@location.name}<br/>
-      #{@location.description}<br/>
-      Exits: #{@location.exits.keys}<br/>
-      Occupants: #{@location.people}"
+      "#{@location.name}\n#{@location.description}\nExits: #{@location.exits.keys}\nOccupants: #{@location.people}"
     else
       examine(name)
     end

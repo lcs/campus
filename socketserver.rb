@@ -36,7 +36,7 @@ starting_place = [Place.new] unless starting_place.any?
 NOWHERE = starting_place.first
 
 def divify(line, css_class="response normal")
-  %[<div class="line"><span class="#{css_class}">#{line}</span></div>]
+    %[#{line}]
 end
 
 EventMachine.run {
