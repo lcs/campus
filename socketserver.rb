@@ -36,7 +36,7 @@ starting_place = [Place.new] unless starting_place.any?
 NOWHERE = starting_place.first
 
 def colorize(line, css_class="response normal")
-    %[#{line}]
+  line.blank? ? line.inspect : %[#{line}]
 end
 
 EventMachine.run {
@@ -46,7 +46,7 @@ EventMachine.run {
     ws.onopen do
       LOG.info ws.inspect
       ws.identified = false
-      response = %[#{MOTD}\n\nWhat is your name? (You will always use this to login.) \nUsers:#{WorldObject.everything.select {|o| o.is_a?(Person)}.inspect}]
+      response = %[#{MOTD}\n\nWho are you? (Type 'visitors' to see a list of previous visitors.)]
       ws.send(colorize(response))
     end
 
@@ -67,33 +67,41 @@ EventMachine.run {
           ws.send colorize("THAT WAS A BAD ERROR! Check the server log for that one. I can't recover.", "response error")
         end
       else
-        login = WorldObject.everything.select {|o| o.is_a?(Person) && o.name == msg }
-        LOG.info login
-        response = if login.size > 1
-          LOG.error %{ERROR: Name duplicate found for #{msg}.}
-          str = "Errcode:HEEZAPONG! There are multiple Person objects with that name in the system.\nError logged.\nTalk to an admin to resolve, or log in as someone else and fix the name duplication."
-          colorize(str, "response alert")
-        elsif login.size == 0
-          ws.person = Person.new(NOWHERE)
-          ws.person.name = msg
-          CONNECTION_MAP[ws.person] = ws
-          ws.identified = true
-          str = "#{msg} has been temporarily created and you are logged in as #{msg}.\nBe sure to read the help section on saving your changes to the world."
-          colorize(str, "response alert")
+        if msg == "visitors"
+          resp = %[#{WorldObject.everything.select {|o| o.is_a?(Person)}.sort{|a,b| a.name <=> b.name}.join("\n")}]
+          resp = "There are no previous visitors." if resp.blank?
+          ws.send resp
+          prompt_again = %[And who are you?]
+          ws.send(colorize(prompt_again))
         else
-          user = login.first
-          if CONNECTION_MAP[user].nil?
-            ws.person = user
-            CONNECTION_MAP[user] = ws
+          login = WorldObject.everything.select {|o| o.is_a?(Person) && o.name == msg }
+          LOG.info login
+          response = if login.size > 1
+            LOG.error %{ERROR: Name duplicate found for #{msg}.}
+            str = "Errcode:HEEZAPONG! There are multiple Person objects with that name in the system.\nError logged.\nTalk to an admin to resolve, or log in as someone else and fix the name duplication."
+            colorize(str, "response alert")
+          elsif login.size == 0
+            ws.person = Person.new(NOWHERE)
+            ws.person.name = msg
+            CONNECTION_MAP[ws.person] = ws
             ws.identified = true
-            str = "You are logged in as #{msg}." 
+            str = "#{msg} (a Person object) has been temporarily created and your connection is attached as #{msg}.\nType 'help' for an explanation of what you can do here."
             colorize(str, "response alert")
           else
-            colorize("That user is already logged in. Try again.", "response alert")
-          end
+            user = login.first
+            if CONNECTION_MAP[user].nil?
+              ws.person = user
+              CONNECTION_MAP[user] = ws
+              ws.identified = true
+              str = "You are attached as #{msg}.\n \n#{ws.person.instance_eval("look")}"
+              colorize(str, "response alert")
+            else
+              colorize("That user is already attached. Try again.", "response alert")
+            end
 
+          end
+          ws.send(response)
         end
-        ws.send(response)
       end
     end
 

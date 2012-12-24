@@ -13,10 +13,8 @@
     
     <!-- BEGIN UI Bulk Here -->
     <div class="ctrl_wrapper">
-      <h3>Old School Client</h3>
       <strong>Campus Server: </strong><input id="wsUri" size="35" value="ws://localhost:33334"/>
       <button id="connect">Connect</button>
-      <button id="disconnect">Disconnect</button>
     </div>
     <div class="term_wrapper rounded-corners">
       <div id="campus" class="term"/>
@@ -34,7 +32,6 @@
     var the_term = null;
     $(document).ready(function() {
       $("#connect").click(connect_to_world);
-      $("#disconnect").click(close_connection);
     	jQuery(function($, undefined) {
     	    the_term = $('#campus').terminal(function(command, term) {
     	        if (command !== '') {

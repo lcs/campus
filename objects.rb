@@ -7,26 +7,26 @@ end
 
 class WorldObject
   attr_accessor :name, :description, :behaviors
-    
-  def to_s
-    @name
+
+  def self.const_missing(name)
+    name.to_s
   end
-    
-  def WorldObject.find_or_create_the_shiny_book_of_help
-    book = WorldObject.everything.select {|o| o.is_a?(Thing) && o.name == "The Shiny Book Of Help"}
-    if book.size == 0
-      help = Thing.new :name => "The Shiny Book Of Help", :description => "It's got it ALL! Add more!"
-      WorldObject.everything << help
-      help
-    else 
-      book.first
-    end
+
+  def help
+    @help.join("\n")
   end
+  
 
   def initialize
     raise "Wait! The name '#{self.name}' is already in use! Sorry. Try specifying another :name on creation." if WorldObject.everything.find {|o| o.name == self.name}
     WorldObject.everything << self
     @behaviors = {}
+    @help = [
+      "",
+      "It's on person.",
+      "Line 3.",
+      "Line 4.",
+    ]
   end
   
   def orphans
@@ -99,10 +99,6 @@ class WorldObject
     WorldObject.everything.select {|o| o.is_a?(Thing)}
   end
   
-  def help
-    WorldObject.find_or_create_the_shiny_book_of_help
-  end
-  
   def display(object)
     "#{object.name}
     #{object.description}"
@@ -111,17 +107,7 @@ class WorldObject
   def everything
     WorldObject.everything
   end
-  
-  def welcome
-    <<-EOF
-  <pre>
-  YOU HAVE ARRIVED. WELCOME.
-
-  If it is your first time here, consider typing "help" and reading.
-  </pre>
-EOF
-  end
-  
+    
   def local_ref(args)
     name, block = *args 
     found = []
@@ -170,9 +156,6 @@ class Place < WorldObject
     self.instance_variables.sort.to_s
   end  
 
-  def to_s
-    @name
-  end
 end
 
 class Person < WorldObject
@@ -181,6 +164,13 @@ class Person < WorldObject
   def save
     WorldObject.save(self)
   end
+  
+  def exit
+    @location.people.each {|p| p.tx "#{@name} disconnects.", "response alert"}
+    tx("You leave. Come back again!")
+    CONNECTION_MAP[self].close_connection_after_writing
+  end
+  alias :bye :exit
   
   def initialize(location)
     @is_bootable = true
@@ -210,10 +200,10 @@ class Person < WorldObject
     name, block = *args 
     if args.nil?
       <<EOF
-#{self.location.to_s}
+#{self.location.name}
 #{self.location.description}
 Exits: #{self.location.exits.keys}
-Occupants: #{self.location.people}"
+Occupants: #{self.location.people}
 EOF
     else
       examine(name)
@@ -240,7 +230,7 @@ EOF
       @location = new_location
       @location.people.each {|p| p.tx "#{@name} joins you.", "response alert"}
       @location.people << self
-      @location.look
+      self.look
     end
   end
 
@@ -275,14 +265,14 @@ EOF
   
   def say(args)
     words, block = *args 
-    (@location.people - [self]).each{ |p| p.tx "#{self.name}: \"#{words}\"" }
-    "#{self.name}: \"#{words}\""
+    (@location.people - [self]).each{ |p| p.tx "[[;#AEF;#000]#{self.name}: \"#{words}\"]" }
+    nil
   end
   alias :s :say
   
   def emote(args)
     action, block = *args 
-    (@location.people - [self]).each{ |p| p.tx "#{self.name} #{action}" }
+    (@location.people - [self]).each{ |p| p.tx "[[i;#8BF;#000]#{self.name} #{action}]" }
     "#{self.name} #{action}"
   end
   alias :e :emote
@@ -290,6 +280,9 @@ EOF
   def method_missing(m, *args, &block)
     return self.send(m, args, block) if self.respond_to? m
     return self.send(:use_exit, m.to_s) if @location.exits.keys.include? m.to_s
+    self.items.each {|i| return i.send(m,args, block) if i.respond_to? m}
+    self.location.items.each {|i| return i.send(m,args, block) if i.respond_to? m}
+    (self.items + self.location.items + self.location.people + [self] + [self.location]).each {|i| return i.name if i.name == m }
     super
   end
   

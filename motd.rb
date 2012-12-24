@@ -4,6 +4,10 @@ MOTD = <<'HERE'
  / /   / _` || '_ ` _ \ | '_ \ | | | |/ __|
 / /___| (_| || | | | | || |_) || |_| |\__ \
 \____/ \__,_||_| |_| |_|| .__/  \__,_||___/
- Derp! Pointless! Meta! |_| A world in Ruby
+ Derp! Metaprogramming! |_| Ruby @MathWorks
+ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+   Send questions, answers and hate-mail to
+       Luke Stark, Matt Allen, Larry Kyrala
+ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
  
 HERE
