@@ -41,7 +41,7 @@ end
 
 EventMachine.run {
 
-  EventMachine::WebSocket.start(:host => "localhost", :port => 33334, :debug => true) do |ws|
+  EventMachine::WebSocket.start(:host => "baby-vm.dhcp.mathworks.com", :port => 33334, :debug => true) do |ws|
 
     ws.onopen do
       LOG.info ws.inspect
