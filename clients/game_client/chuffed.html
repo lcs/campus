@@ -13,6 +13,12 @@
   var output;
   var websocket;
 
+  function parse_response(response) {
+    console.log(response);
+    object = eval("(" + response + ")");
+    return object;
+  }
+
   function connect_to_world()
   {
     websocket = new WebSocket(wsUri);
@@ -45,7 +51,19 @@
 
   function onMessage(evt)
   {
-    writeToScreen('<span style="color: #6666CC;">' + evt.data+'</span>');
+    response = parse_response(evt.data);
+    console.log(response);
+    if (response.type == "system") {
+      writeToScreen('<span style="color: white;"><pre>' + response.text.replace("\n", "<br/>") +'</pre></span>');
+    } else if (response.type == "error") {
+      writeToScreen('<span style="color: red;">' + response.text.replace("\n", "<br/>") +'</span>');
+    } else if (response.type == "title") {
+      writeToScreen('<span style="color: white;">' + response.text.replace("\n", "<br/>") +'</span>');
+    } else if (response.type == "info") {
+      writeToScreen('<span style="color: green;">' + response.text.replace("\n", "<br/>") +'</span>');
+    } else {
+      writeToScreen('<span style="color: #6666CC;">' + response.text.replace("\n", "<br/>") +'</span>');
+    }
   }
 
   function onError(evt)
@@ -62,7 +80,7 @@
     }
     else
     {
-      writeToScreen("<br><font color='#0066CC'>you>&nbsp; </font><font color='green'>" + message + "</font><br>"); 
+      writeToScreen("<br><font color='#0066CC'>>>&nbsp; </font><font color='#99FF99'>" + message + "</font><br>"); 
       websocket.send(message);
       $("#sendMessage").val("");
     }
