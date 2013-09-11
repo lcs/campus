@@ -14,13 +14,16 @@ require './motd.rb'
 CONNECTION_MAP = {}
 
 host = "localhost"
+snapdir = "snapshots"
 
 LOG = Logger.new(STDOUT)
-snapdir = "snapshots"
+
 Dir.mkdir(snapdir) unless File.exists?(snapdir)
 
 snapshots = Array.new
+
 Dir.new(snapdir).entries.each { |n| snapshots.push(snapdir + "/" + n) if File.file?(snapdir + "/" + n) }
+
 snapshots = snapshots.sort_by {|filename| File.mtime(filename) }
 
 if snapshots.any?
