@@ -13,9 +13,11 @@ require './motd.rb'
 # key is person object, value is connection
 CONNECTION_MAP = {}
 
+host = "localhost"
+
 LOG = Logger.new(STDOUT)
 snapdir = "snapshots"
-Dir.mkdir(directory_name) unless File.exists?(snapdir)
+Dir.mkdir(snapdir) unless File.exists?(snapdir)
 
 snapshots = Array.new
 Dir.new(snapdir).entries.each { |n| snapshots.push(snapdir + "/" + n) if File.file?(snapdir + "/" + n) }
@@ -38,7 +40,7 @@ NOWHERE = starting_place.first
 
 EventMachine.run {
 
-  EventMachine::WebSocket.start(:host => "baby-vm.dhcp.mathworks.com", :port => 33334, :debug => true) do |ws|
+  EventMachine::WebSocket.start(:host => host, :port => 33334, :debug => true) do |ws|
 
     ws.onopen do
       WorldHandler.go(ws)
