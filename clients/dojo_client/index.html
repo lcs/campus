@@ -24,6 +24,7 @@
 			    "dijit/layout/TabContainer",
 			    "dijit/form/TextBox",
 			    "dijit/form/Textarea",
+			    "dojox/socket",
 			    "dojo/domReady!"
 			], function(on, dom, domConstruct, domStyle, keys, domClass, BorderContainer, ContentPane, TabContainer, TextBox, TextArea){
 			    // create a BorderContainer as the top widget in the hierarchy
@@ -62,6 +63,33 @@
 			    		this.set("value", "");
 		    		};
 		    	});
+
+		    	function writeToScreen(out) {
+		    		var div = domConstruct.create("div", {innerHTML: out});
+		    		domConstruct.place(div, main.domNode);
+		    		main.domNode.scrollTop = main.domNode.scrollHeight;
+		    	}
+
+		    	//Setup socket test.
+		    	socket = dojox.socket("ws://localhost:33334");
+				socket.on("message", function(event){
+				  var existingId = event.data.id;
+				  var object = event.data.object;
+				  response = eval("(" + event.data + ")");
+				  //store.notify(object, existingId);
+				  console.log(response);
+					if (response.type == "system") {
+					  writeToScreen('<span style="color: white;"><pre>' + response.text.replace("\n", "<br/>") +'</pre></span>');
+					} else if (response.type == "error") {
+					  writeToScreen('<span style="color: red;">' + response.text.replace("\n", "<br/>") +'</span>');
+					} else if (response.type == "title") {
+					  writeToScreen('<span style="color: white;">' + response.text.replace("\n", "<br/>") +'</span>');
+					} else if (response.type == "info") {
+					  writeToScreen('<span style="color: green;">' + response.text.replace("\n", "<br/>") +'</span>');
+					} else {
+					  writeToScreen('<span style="color: #6666CC;">' + response.text.replace("\n", "<br/>") +'</span>');
+					}
+				});
 
 			    // put the top level widget into the document, and then call startup()
 			    document.body.appendChild(bc.domNode);
