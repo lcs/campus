@@ -22,19 +22,28 @@ html, body {
 	height: 550px;
 }
 
-.cssInputConsole {
+.claro .cssInputConsole {
 	position:relative;
 	font-family: courier;
 	font-size: 14px;
-	background: black;
-	color: #21f838;
-	padding: 5px;
+	background-color: white;
+	color: blue;
+	padding: 0px;
 	overflow: hidden;
 	height: 20px;
 	cursor:text;
 	width: 100%;
 }
 
-.outputScroll {
+.claro .cssOutputScroll {
 	overflow: auto;
+	position:relative;
+	font-family: courier;
+	font-size: 14px;
+	background-color: black;
+	color: #21f838;
+	padding: 5px;
+	height: 20px;
+	cursor:text;
+	width: 100%;
 }

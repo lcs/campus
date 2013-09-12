@@ -3,9 +3,9 @@
 	<head>
 		<meta charset="utf-8">
 		<title>Demo: Layout with Dijit</title>
+		<link rel="stylesheet" href="//ajax.googleapis.com/ajax/libs/dojo/1.9.1/dijit/themes/claro/claro.css" media="screen">
 		<link rel="stylesheet" href="css/demo.css" media="screen">
 		<link rel="stylesheet" href="css/style.css" media="screen">
-		<link rel="stylesheet" href="//ajax.googleapis.com/ajax/libs/dojo/1.9.1/dijit/themes/claro/claro.css" media="screen">
 	</head>
 	<body class="claro">
 		<!-- load dojo -->
@@ -17,6 +17,7 @@
 				"dojo/dom",
 				"dojo/dom-construct",
 				"dojo/dom-style",
+				"dojo/keys",
 				"dojo/dom-class",
 			    "dijit/layout/BorderContainer",
 			    "dijit/layout/ContentPane",
@@ -24,17 +25,19 @@
 			    "dijit/form/TextBox",
 			    "dijit/form/Textarea",
 			    "dojo/domReady!"
-			], function(on, dom, domConstruct, domStyle, domClass, BorderContainer, ContentPane, TabContainer, TextBox, TextArea){
+			], function(on, dom, domConstruct, domStyle, keys, domClass, BorderContainer, ContentPane, TabContainer, TextBox, TextArea){
 			    // create a BorderContainer as the top widget in the hierarchy
 			    var bc = new BorderContainer({style: "height: 100%; width: 100%;"});
+
+
 
 			    var bottom = new ContentPane({
 			        region: "bottom"
 			    });
 
-			    var textInput = new TextBox({id: "textInput", value: "Say...", class: "cssInputConsole"});
-			    domStyle.set(textInput.domNode, "width", "100%");
-			    domClass.add(textInput.domNode, "cssConsole");
+			    var textInput = new TextBox({id: "textInput", value: "Type something...", class: "cssInputConsole"});
+			    //domStyle.set(textInput.domNode, "width", "100%");
+			    //domClass.add(textInput.domNode, "cssConsole");
 
 			    bottom.addChild(textInput);
 
@@ -42,29 +45,23 @@
 
 			    var main = new ContentPane({
 			        region: "center",
-			        class: "outputScroll"
+			        class: "cssOutputScroll"
 			    });
 
 			    bc.addChild(bottom);
-
 			    bc.addChild(main);
 
-			    //Create DOM Bits
-			    var setupDom = function(on, dom, domConstruct, target1, target2) {
-			    	function doInput(evt) {
-			    		if (evt.keyCode == 13) {
-				    		var div = domConstruct.create("div", {innerHTML: this.get("value")});
-				    		domConstruct.place(div, target2);
-				    		target2.scrollTop = target2.scrollHeight;
-				    		this.set("value", "");
-			    		};
-			    	}
-			    	//var adderButton = domConstruct.create("button", {id: "adderButton", innerHTML: "Add"});
-			    	on(textInput, "keydown", doInput);
-			    	//target1.appendChild(adderButton);
-			    }
-
-			    setupDom(on, dom, domConstruct, bottom.domNode, main.domNode);
+		    	
+		    	//var adderButton = domConstruct.create("button", {id: "adderButton", innerHTML: "Add"});
+		    	//target1.appendChild(adderButton);
+		    	on(textInput, "keydown", function (evt) {
+		    		if (evt.keyCode == keys.ENTER) {
+			    		var div = domConstruct.create("div", {innerHTML: this.get("value")});
+			    		domConstruct.place(div, main.domNode);
+			    		main.domNode.scrollTop = main.domNode.scrollHeight;
+			    		this.set("value", "");
+		    		};
+		    	});
 
 			    // put the top level widget into the document, and then call startup()
 			    document.body.appendChild(bc.domNode);
