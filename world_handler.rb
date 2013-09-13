@@ -9,12 +9,7 @@ class WorldHandler
   end
 
   def self.motd
-    create_response("#{MOTD}", "system")
-  end
-
-  def self.who_are_you
-      challenge = %[Who are you? (Type 'visitors' to see a list of previous visitors.)]
-      create_response(challenge, "system")
+    create_response("#{CGI.escapeHTML(MOTD)}", "system")
   end
 
   def self.visitors
@@ -23,12 +18,10 @@ class WorldHandler
     create_response resp, "info"
   end
 
-  def self.create_person(ws, name)
+  def self.create_person(ws)
     ws.person = Person.new(NOWHERE)
-    ws.person.name = name
     CONNECTION_MAP[ws.person] = ws
-    ws.identified = true
-    str = "#{name} (a Person object) has been temporarily created and your connection is attached as #{name}.\nType 'help' for an explanation of what you can do here."
+    str = "#{ws.person.name} (a Person object) has been temporarily created and your connection is attached.\nType 'help' for an explanation of what you can do here."
     create_response(str, "system")
   end
 
@@ -36,7 +29,6 @@ class WorldHandler
     if CONNECTION_MAP[user].nil?
       ws.person = user
       CONNECTION_MAP[user] = ws
-      ws.identified = true
       str = "You are attached as #{user.name}."
       create_response(str, "system")
     else
@@ -47,32 +39,15 @@ class WorldHandler
   def self.go(ws, msg=nil)
     begin
       if msg.nil?
-        ws.identified = false
+        # initial connection
         ws.send motd
-        ws.send who_are_you
+        ws.send create_person(ws)
       else
-        if ws.identified
-          responses = ws.person.instance_eval(msg)
-          if responses.is_a? ResponseArray
-            responses.each {|r| ws.send r} 
-          else
-            ws.send create_response(responses.inspect, "info")
-          end
+        responses = ws.person.instance_eval(msg)
+        if responses.is_a? ResponseArray
+          responses.each {|r| ws.send r} 
         else
-          if msg == "visitors"
-            ws.send visitors
-            ws.send who_are_you
-          else
-            login = WorldObject.everything.select {|o| o.is_a?(Person) && o.name == msg }
-            if login.size > 1
-              LOG.error %{ERROR: Name duplicate found for #{msg}.}
-              raise "Errcode:HEEZAPONG! There are multiple Person objects with that name in the system.\nError logged.\nTalk to an admin to resolve, or log in as someone else and fix the name duplication."
-            elsif login.size == 0
-              ws.send create_person(ws, msg)
-            else
-              ws.send attach(ws, login.first)
-            end
-          end
+          ws.send create_response(CGI.escapeHTML(responses.inspect), "info")
         end
       end
     rescue Exception => e

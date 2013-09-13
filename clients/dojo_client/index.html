@@ -66,26 +66,34 @@
 		    		};
 		    	});
 
+		    	// locate hyperlinks in the output and turn them into links that target new tabs/windows
+		    	function linkify_and_break(text) {
+		    		var modified = text.replace("\n", "<br/>");
+				    var exp = /(\(?\bhttps?:\/\/[-A-Za-z0-9+&@#\/%?=~_()|!:,.;]*[-A-Za-z0-9+&@#\/%=~_()|])/ig;
+				    return modified.replace(exp,"<a href='$1' target='_blank'>$1</a>"); 
+				}
+
+				// wrap output in divs, linkify, append and scroll page down
 		    	function writeToScreen(out) {
-		    		var div = domConstruct.create("div", {innerHTML: out});
+		    		var div = domConstruct.create("div", {innerHTML: linkify_and_break(out)});
 		    		domConstruct.place(div, main.domNode);
 		    		main.domNode.scrollTop = main.domNode.scrollHeight;
 		    	}
 
-		    	//Setup socket test.
+		    	// respond to messages on the socket and 
 				socket.on("message", function(event){
 				  response = eval("(" + event.data + ")");
 				  //store.notify(object, existingId);
 					if (response.type == "system") {
-					  writeToScreen('<span style="color: cyan;"><pre>' + response.text.replace("\n", "<br/>") +'</pre></span>');
+					  writeToScreen('<span style="color: cyan;"><pre>' + response.text +'</pre></span>');
 					} else if (response.type == "error") {
-					  writeToScreen('<span style="color: red;">' + response.text.replace("\n", "<br/>") +'</span>');
+					  writeToScreen('<span style="color: red;">' + response.text +'</span>');
 					} else if (response.type == "title") {
-					  writeToScreen('<span style="color: white;">' + response.text.replace("\n", "<br/>") +'</span>');
+					  writeToScreen('<span style="color: white;">' + response.text +'</span>');
 					} else if (response.type == "info") {
-					  writeToScreen('<span style="color: #AAAAAA;">' + response.text.replace("\n", "<br/>") +'</span>');
+					  writeToScreen('<span style="color: #AAAAAA;">' + response.text +'</span>');
 					} else {
-					  writeToScreen('<span style="color: #CCFFDD;">' + response.text.replace("\n", "<br/>") +'</span>');
+					  writeToScreen('<span style="color: #CCFFDD;">' + response.text +'</span>');
 					}
 				});
 

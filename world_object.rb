@@ -1,5 +1,7 @@
 class WorldObject
-  attr_accessor :name, :description, :behaviors
+  attr_accessor :name, :description, :behaviors, :is_real
+
+  @@object_count = 0
 
   def self.const_missing(name)
     name.to_s
@@ -30,6 +32,7 @@ class WorldObject
     WorldObject.everything << self
     @behaviors = {}
     @help = "I'm helptext for this object!"
+    @is_real = false
   end
   
   def orphans
@@ -46,28 +49,6 @@ class WorldObject
     WorldObject.everything += orphans
   end
   
-  def boot_the_sleepers
-    orig = sleepers
-    sleepers.each do |s|
-      if s.is_bootable
-        WorldObject.everything.delete s
-        s.location.people.delete s
-      end
-    end
-    (orig - sleepers).to_s + " have been booted."
-  end
-  
-  def sweep
-    orig = things
-    things.each do |s|
-      if s.is_sweepable
-        WorldObject.everything.delete s
-        s.location.items.delete s
-      end
-    end
-    (orig - things).to_s + " have been swept."
-  end
-
   def self.everything
     @all_objects ||= []
   end
@@ -117,11 +98,7 @@ class WorldObject
     #found += items.select {|i| i.name == name}
     found += @location.items.select {|i| i.name == name}
     found += @location.people.select {|i| i.name == name}
-    if found.size == 1
-      found.first
-    else
-      found
-    end
+    found
   end
   
   def world_ref(args)

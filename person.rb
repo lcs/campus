@@ -1,5 +1,5 @@
 class Person < WorldObject
-  attr_accessor :items, :location, :is_bootable
+  attr_accessor :items, :location
   
   def save
     WorldObject.save(self)
@@ -13,10 +13,10 @@ class Person < WorldObject
   alias :bye :exit
   
   def initialize(location)
-    @is_bootable = true
+    @is_real = false
     @location = location
     @location.people << self
-    @name = "Guest-#{rand(999999)}"
+    @name = "Guest"
     @description = "I am a faceless person. I should edit my description attributes to become more real (virtually.)"
     @items = []
     super()
@@ -43,7 +43,7 @@ class Person < WorldObject
       ra << create_response("#{self.location.name}","title")
       ra << create_response("#{self.location.description}","info")
       ra << create_response("Exits: #{self.location.exits.keys}","info")
-      ra << create_response("Occupants: #{self.location.people}","info")
+      ra << create_response("Occupants: #{self.location.people.map {|p| p.name}}","info")
       ra
     else
       examine(name)

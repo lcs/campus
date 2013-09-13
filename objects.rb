@@ -14,7 +14,7 @@ class ResponseArray < Array
 end
 
 class EventMachine::WebSocket::Connection
-  attr_accessor :identified, :person, :is_sweepable
+  attr_accessor :person, :is_sweepable
 
   def marshal_dump
     nil
