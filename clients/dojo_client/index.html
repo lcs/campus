@@ -24,9 +24,10 @@
 			    "dijit/layout/TabContainer",
 			    "dijit/form/TextBox",
 			    "dijit/form/Textarea",
+			    "dijit/focus",
 			    "dojox/socket",
 			    "dojo/domReady!"
-			], function(on, dom, domConstruct, domStyle, keys, domClass, BorderContainer, ContentPane, TabContainer, TextBox, TextArea){
+			], function(on, dom, domConstruct, domStyle, keys, domClass, BorderContainer, ContentPane, TabContainer, TextBox, TextArea, focusUtil){
 			    // create a BorderContainer as the top widget in the hierarchy
 			    var bc = new BorderContainer({style: "height: 100%; width: 100%;"});
 
@@ -75,7 +76,6 @@
 				socket.on("message", function(event){
 				  response = eval("(" + event.data + ")");
 				  //store.notify(object, existingId);
-				  console.log(response);
 					if (response.type == "system") {
 					  writeToScreen('<span style="color: cyan;"><pre>' + response.text.replace("\n", "<br/>") +'</pre></span>');
 					} else if (response.type == "error") {
@@ -92,7 +92,7 @@
 			    // put the top level widget into the document, and then call startup()
 			    document.body.appendChild(bc.domNode);
 			    bc.startup();
-			    textInput.focus();
+			    focusUtil.focus(textInput);
 			});
 		</script>
 	</body>
